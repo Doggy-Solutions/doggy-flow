@@ -16,8 +16,10 @@ import {
 import {
 	sendTextMessage,
 	sendOptionsMessage,
-	sendButtonMessage
+	sendButtonMessage,
 } from "../services/whatsapp.service.js";
+
+import { apiClient } from '../services/api.services.js';
 
 /**
  * =========================
@@ -57,11 +59,10 @@ const handleStart = async (from, user) => {
 		from,
 		`👋 Hola ${user.profile?.name || "amigo"}, bienvenido a la barbería.`,
 	);
-	console.log('Service buttons');
+	console.log("Service buttons");
 	console.log(SERVICE_BUTTONS);
 
 	await sendOptionsMessage(from, "¿Qué servicio deseas?", SERVICE_BUTTONS);
-
 };
 
 const handleSelectService = async (from, userInput) => {
@@ -160,3 +161,19 @@ export const handleIncomingMessage = async (from, message, user) => {
 			break;
 	}
 };
+
+export async function handleMessage(payload: any) {
+	const entry = payload.entry[0];
+	const change = entry.changes[0];
+	const value = change.value;
+
+	const phoneNumberId = value.metadata.phone_number_id;
+	const from = value.messages?.[0]?.from;
+	const text = value.messages?.[0]?.text?.body;
+
+	await apiClient.post("/wa/inbound", {
+		phone_number_id: phoneNumberId,
+		from,
+		text,
+	});
+}

@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: doggy-postgres
+    environment:
+      POSTGRES_USER: doggys
+      POSTGRES_PASSWORD: doggys
+      POSTGRES_DB: doggy_saas
+    ports:
+      - "5433:5432"
+    volumes:
+      - doggy_pg_data:/var/lib/postgresql/data
+
+volumes:
+  doggy_pg_data:
