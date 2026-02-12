@@ -31,11 +31,13 @@ export const receiveMessage = async (req: Request, res: Response) => {
 
 		const from = message.from;
 		const body = message.text?.body;
+		const phoneNumberId = changes.value.metadata.phone_number_id;
 
 		console.log("Mensaje recibido:", from, body);
 
 		// 🔹 Enviar a api-core
 		await axios.post(`${env.apiCoreUrl}/messages/incoming`, {
+			phoneNumberId,
 			from,
 			body,
 		});
