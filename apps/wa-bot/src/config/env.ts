@@ -7,6 +7,8 @@ interface EnvConfig {
 	whatsappToken: string;
 	whatsappPhoneNumberId: string;
 	metaApiUrl: string;
+	waBotToken: string;
+	apiCoreUrl: string;
 }
 
 export const env: EnvConfig = {
@@ -15,6 +17,8 @@ export const env: EnvConfig = {
 	whatsappToken: process.env.WHATSAPP_TOKEN as string,
 	whatsappPhoneNumberId: process.env.WHATSAPP_PHONE_NUMBER_ID || "",
 	metaApiUrl: process.env.META_API_URL || "",
+	waBotToken: process.env.WA_BOT_TOKEN || "",
+	apiCoreUrl: process.env.API_CORE_URL || "",
 };
 
 if (!env.whatsappWebHookVerifyToken || !env.whatsappToken) {
