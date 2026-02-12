@@ -6,11 +6,11 @@ services:
     container_name: doggy_postgres
     restart: always
     environment:
-      POSTGRES_USER: doggys
-      POSTGRES_PASSWORD: doggys
-      POSTGRES_DB: doggy_saas
+      POSTGRES_USER: ${PG_USER}
+      POSTGRES_PASSWORD: ${PG_PASSWORD}
+      POSTGRES_DB: ${PG_DATABASE}
     ports:
-      - "5433:5432"
+      - "${PG_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
