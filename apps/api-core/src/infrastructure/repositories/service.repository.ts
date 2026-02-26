@@ -9,4 +9,13 @@ export class ServiceRepository {
 
 		return rows;
 	}
+
+	static async findById(serviceId: string, tenantId: string) {
+		const { rows } = await pg.query(
+			`SELECT * FROM services WHERE id = $1 AND tenant_id = $2`,
+			[serviceId, tenantId],
+		);
+
+		return rows[0];
+	}
 }

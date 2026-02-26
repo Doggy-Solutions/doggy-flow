@@ -14,4 +14,24 @@ export class AppointmentRepository {
 
 		return rows[0];
 	}
+
+	static async getByEmployeeAndDate(
+		employeeId: string,
+		tenantId: string,
+		date: string,
+	) {
+		const result = await pg.query(
+			`
+    SELECT start_time, end_time
+    FROM appointments
+    WHERE employee_id = $1
+      AND tenant_id = $2
+      AND DATE(start_time) = $3
+      AND status IN ('confirmed','pending')
+    `,
+			[employeeId, tenantId, date],
+		);
+
+		return result.rows;
+	}
 }
