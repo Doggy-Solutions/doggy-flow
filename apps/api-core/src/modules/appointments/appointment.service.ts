@@ -1,4 +1,5 @@
 import { pool } from "../../config/db.js";
+import { AvailabilityService } from "../availability/availability.service.js";
 
 export const createAppointment = async (
 	tenantId: string,
@@ -7,6 +8,23 @@ export const createAppointment = async (
 	clientPhone: string,
 	startTime: string,
 ) => {
+	const availabilityService = new AvailabilityService();
+
+	const slots = await availabilityService.getAvailableSlots({
+		tenantId,
+		employeeId,
+		serviceId,
+		date: startTime.toString().split("T")[0],
+	});
+
+	const isValid = slots.some(
+		(s) => s.start.getTime() === new Date(startTime).getTime(),
+	);
+
+	if (!isValid) {
+		throw new Error("Slot no disponible");
+	}
+
 	const result = await pool.query(
 		`
     INSERT INTO appointments (

@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import internalWaRoutes from './routes/internalWa.routes.js';
 import { messageRouter } from './routes/message.routes.js';
 import { appointmentsRouter } from './modules/appointments/appointments.routes.js';
+import availabilityRoutes from './modules/availability/availability.routes.js';
 
 dotenv.config();
 
@@ -12,5 +13,6 @@ app.use(express.json());
 app.use('/internal', internalWaRoutes);
 app.use("/messages", messageRouter);
 app.use('/appointments', appointmentsRouter);
+app.use("/availability", availabilityRoutes);
 
 export default app;
