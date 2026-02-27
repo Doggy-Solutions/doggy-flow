@@ -1,44 +1,93 @@
 import { pool } from "../../config/db.js";
 import { AvailabilityService } from "../availability/availability.service.js";
+import { addMinutes } from "date-fns";
 
 export const createAppointment = async (
 	tenantId: string,
 	employeeId: string,
 	serviceId: string,
 	clientPhone: string,
-	startTime: string,
+	startTimeISO: string,
 ) => {
-	const availabilityService = new AvailabilityService();
+	const client = await pool.connect();
 
-	const slots = await availabilityService.getAvailableSlots({
-		tenantId,
-		employeeId,
-		serviceId,
-		date: startTime.toString().split("T")[0],
-	});
+	try {
+		await client.query("BEGIN");
 
-	const isValid = slots.some(
-		(s) => s.start.getTime() === new Date(startTime).getTime(),
-	);
+		const availabilityService = new AvailabilityService();
 
-	if (!isValid) {
-		throw new Error("Slot no disponible");
-	}
+		const startTime = new Date(startTimeISO);
+		const date = startTime.toISOString().split("T")[0];
 
-	const result = await pool.query(
-		`
-    INSERT INTO appointments (
+		const slots = await availabilityService.getAvailableSlots({
+			tenantId,
+			employeeId,
+			serviceId,
+			date,
+		});
+
+		const isValid = slots.some(
+			(s) => s.start.getTime() === startTime.getTime(),
+		);
+
+		if (!isValid) {
+			throw new Error("Slot no disponible");
+		}
+
+		// 🔒 Lock preventivo
+		await client.query(
+			`
+      SELECT id
+      FROM appointments
+      WHERE employee_id = $1
+        AND tenant_id = $2
+        AND start_time = $3
+      FOR UPDATE
+      `,
+			[employeeId, tenantId, startTime],
+		);
+
+		const serviceResult = await client.query(
+			`
+      SELECT duration_minutes
+      FROM services
+      WHERE id = $1
+        AND tenant_id = $2
+      `,
+			[serviceId, tenantId],
+		);
+
+		if (!serviceResult.rows.length) {
+			throw new Error("Service not found");
+		}
+
+		const duration = serviceResult.rows[0].duration_minutes;
+		const endTime = addMinutes(startTime, duration);
+
+		const result = await client.query(
+			`
+      INSERT INTO appointments (
         tenant_id,
         employee_id,
         service_id,
         client_phone,
-        start_time
-    )
-    VALUES ($1,$2,$3,$4,$5)
-    RETURNING *
-    `,
-		[tenantId, employeeId, serviceId, clientPhone, startTime],
-	);
+        start_time,
+        end_time,
+        status
+      )
+      VALUES ($1,$2,$3,$4,$5,$6,'confirmed')
+      RETURNING *
+      `,
+			[tenantId, employeeId, serviceId, clientPhone, startTime, endTime],
+		);
 
-	return result.rows[0];
+		await client.query("COMMIT");
+
+		return result.rows[0];
+	} catch (error) {
+		await client.query("ROLLBACK");
+		throw error;
+	} finally {
+		client.release();
+	}
 };

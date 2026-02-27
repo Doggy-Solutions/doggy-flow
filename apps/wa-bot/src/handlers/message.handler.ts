@@ -5,7 +5,8 @@ import {
 } from "../state/wa.state.store.js";
 
 import {
-	BOT_STATES, BotState,
+	BOT_STATES,
+	BotState,
 	BARBERS,
 	SERVICES,
 	SERVICE_BUTTONS,
@@ -19,7 +20,11 @@ import {
 	sendButtonMessage,
 } from "../services/whatsapp.service.js";
 
-import { apiClient } from '../services/api.services.js';
+import {
+	apiClient,
+	getAvailability,
+	createAppointmentApi,
+} from "../services/api.services.js";
 
 /**
  * =========================
@@ -79,7 +84,11 @@ const handleSelectService = async (from: string, userInput: string) => {
 	await sendOptionsMessage(from, "¿Con qué barbero?", BARBER_BUTTONS);
 };
 
-const handleSelectBarber = async (from: string, conversation: any, userInput: string) => {
+const handleSelectBarber = async (
+	from: string,
+	conversation: any,
+	userInput: string,
+) => {
 	if (!BARBERS[userInput]) {
 		await sendTextMessage(from, "❌ Barbero inválido. Usa los botones.");
 		return;
@@ -104,9 +113,25 @@ const handleSelectBarber = async (from: string, conversation: any, userInput: st
 
 const handleConfirm = async (from: string, userInput: string) => {
 	if (userInput === "CONFIRM_YES") {
-		await sendTextMessage(from, "✅ Cita confirmada.");
-		resetConversation(from);
-		return;
+		try {
+			await createAppointmentApi({
+				tenantId: "default",
+				employeeId: conversation.data.barber.id,
+				serviceId: conversation.data.service.id,
+				clientPhone: from,
+				startTimeISO: getConversation(from).data.selectedSlot.start.toISOString(),
+			});
+			await sendTextMessage(
+				from,
+				"✅ Cita confirmada. ¡Te esperamos!",
+			);
+		} catch (error) {
+			console.error(error);
+			await sendTextMessage(
+				from,
+				"❌ No se pudo crear la cita. Intenta de nuevo.",
+			);
+		}
 	}
 
 	if (userInput === "CONFIRM_NO") {
@@ -124,12 +149,54 @@ const handleConfirm = async (from: string, userInput: string) => {
 	);
 };
 
+const handleSelectDate = async (
+	from: string,
+	conversation: any,
+	userInput: string,
+) => {
+
+	const selectedDate = new Date(userInput).toISOString().split("T")[0];
+
+
+	const slots = await getAvailability(
+		conversation.data.barber.id,
+		conversation.data.service.id,
+		selectedDate,
+	);
+
+	setConversation(from, {
+		state: BOT_STATES.SELECT_SLOT,
+		data: {
+			...conversation.data,
+			date: selectedDate,
+			slots,
+		},
+	});
+};
+
+const handleSelectSlot = async (
+	from: string,
+	conversation: any,
+	userInput: string,
+) => {
+	const selectedSlot = conversation.data.slots[index];
+
+	if (!selectedSlot) {
+		await sendTextMessage(from, "❌ Horario inválido. Escoge una opción válida.");
+		return;
+	}
+};
+
 /**
  * =========================
  * Main
  * =========================
  */
-export const handleIncomingMessage = async (from: string, message: any, user: any) => {
+export const handleIncomingMessage = async (
+	from: string,
+	message: any,
+	user: any,
+) => {
 	const userInput = getUserInput(message);
 	const conversation = getConversation(from);
 
@@ -148,6 +215,14 @@ export const handleIncomingMessage = async (from: string, message: any, user: an
 			break;
 
 		case BOT_STATES.SELECT_DATE:
+			// Implementar lógica para seleccionar fecha
+			break;
+
+		case BOT_STATES.SELECT_SLOT:
+			// Implementar lógica para seleccionar horario
+			break;
+
+		case BOT_STATES.CONFIRM:
 			await handleConfirm(from, userInput);
 			break;
 
