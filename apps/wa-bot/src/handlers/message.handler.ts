@@ -5,7 +5,7 @@ import {
 } from "../state/wa.state.store.js";
 
 import {
-	BOT_STATES,
+	BOT_STATES, BotState,
 	BARBERS,
 	SERVICES,
 	SERVICE_BUTTONS,
@@ -26,7 +26,7 @@ import { apiClient } from '../services/api.services.js';
  * Helpers
  * =========================
  */
-const getUserInput = (message) => {
+const getUserInput = (message: string) => {
 	if (message.type !== "interactive") {
 		return message.text?.body?.trim().toLowerCase();
 	}
@@ -49,7 +49,7 @@ const getUserInput = (message) => {
  * State Handlers
  * =========================
  */
-const handleStart = async (from, user) => {
+const handleStart = async (from: string, user: string) => {
 	setConversation(from, {
 		state: BOT_STATES.SELECT_SERVICE,
 		data: {},
@@ -65,7 +65,7 @@ const handleStart = async (from, user) => {
 	await sendOptionsMessage(from, "¿Qué servicio deseas?", SERVICE_BUTTONS);
 };
 
-const handleSelectService = async (from, userInput) => {
+const handleSelectService = async (from: string, userInput: string) => {
 	if (!SERVICES[userInput]) {
 		await sendTextMessage(from, "❌ Selecciona un servicio válido.");
 		return;
@@ -79,7 +79,7 @@ const handleSelectService = async (from, userInput) => {
 	await sendOptionsMessage(from, "¿Con qué barbero?", BARBER_BUTTONS);
 };
 
-const handleSelectBarber = async (from, conversation, userInput) => {
+const handleSelectBarber = async (from: string, conversation: any, userInput: string) => {
 	if (!BARBERS[userInput]) {
 		await sendTextMessage(from, "❌ Barbero inválido. Usa los botones.");
 		return;
@@ -102,7 +102,7 @@ const handleSelectBarber = async (from, conversation, userInput) => {
 	);
 };
 
-const handleConfirm = async (from, userInput) => {
+const handleConfirm = async (from: string, userInput: string) => {
 	if (userInput === "CONFIRM_YES") {
 		await sendTextMessage(from, "✅ Cita confirmada.");
 		resetConversation(from);
@@ -129,7 +129,7 @@ const handleConfirm = async (from, userInput) => {
  * Main
  * =========================
  */
-export const handleIncomingMessage = async (from, message, user) => {
+export const handleIncomingMessage = async (from: string, message: any, user: any) => {
 	const userInput = getUserInput(message);
 	const conversation = getConversation(from);
 
@@ -137,10 +137,6 @@ export const handleIncomingMessage = async (from, message, user) => {
 		await handleStart(from, user);
 		return;
 	}
-
-	console.log(
-		`[BOT] ${from} | State: ${conversation.state} | Input: ${userInput}`,
-	);
 
 	switch (conversation.state) {
 		case BOT_STATES.SELECT_SERVICE:
@@ -151,7 +147,7 @@ export const handleIncomingMessage = async (from, message, user) => {
 			await handleSelectBarber(from, conversation, userInput);
 			break;
 
-		case BOT_STATES.CONFIRM:
+		case BOT_STATES.SELECT_DATE:
 			await handleConfirm(from, userInput);
 			break;
 
