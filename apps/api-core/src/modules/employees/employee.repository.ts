@@ -1,6 +1,6 @@
 import {db } from "../../database/postgress.js";
-export const EmployeeRepository = {
-	async getWorkingHoursForDate(
+export class EmployeeRepository {
+	static async getWorkingHoursForDate(
 		employeeId: string,
 		tenantId: string,
 		date: string,
@@ -19,9 +19,9 @@ export const EmployeeRepository = {
 		);
 
 		return result.rows[0];
-	},
+	}
 
-	async getTimeOffForDate(employeeId: string, tenantId: string, date: string) {
+	static async getTimeOffForDate(employeeId: string, tenantId: string, date: string) {
 		const result = await db.query(
 			`
       SELECT start_datetime, end_datetime
@@ -34,5 +34,25 @@ export const EmployeeRepository = {
 		);
 
 		return result.rows;
-	},
+	}
+
+	static async findByTenant(tenantId: string) {
+		const result = await db.query(
+			`SELECT id, name FROM employees WHERE tenant_id = $1; `,
+			[tenantId]
+		);
+
+		return result.rows;
+	}
+
+	static async findById(employeeId: string, tenantId: string) {
+		const result = await db.query(
+			`SELECT id, name FROM employees WHERE id = $1 AND tenant_id = $2; `,
+			[employeeId, tenantId]
+		);
+
+		return result.rows[0];
+	}
+
+	
 };
