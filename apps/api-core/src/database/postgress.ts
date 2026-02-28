@@ -1,10 +1,8 @@
-import { config } from "../config/env.js";
-import pkg from 'pg';
+import { config } from "../config/env.config.js";
+import { Pool } from "pg";
 
-const { Pool } = pkg;
+export const db = new Pool(config.db);
 
-export const pg = new Pool(config.db);
-
-pg.on("connect", () => {
+db.on("connect", () => {
 	console.log("✅ PostgreSQL connected");
 });
