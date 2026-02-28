@@ -1,4 +1,4 @@
-import { pg } from "../db/postgress.js";
+import { pg } from "../../database/postgress.js";
 
 export class ServiceRepository {
 	static async findByTenant(tenantId: string) {
