@@ -1,8 +1,8 @@
 import { addMinutes, isBefore } from "date-fns";
 import { AvailabilityInput, TimeSlot } from "./availability.types.js";
 import { ServiceRepository } from "../services/service.repository.js";
-import { AppointmentRepository } from "../../infrastructure/repositories/appointment.repository.js";
-import { EmployeeRepository } from "../../infrastructure/repositories/employee.repository.js";
+import { AppointmentRepository } from "../appointments/appointment.repository.js";
+import { EmployeeRepository } from "../employees/employee.repository.js";
 
 export class AvailabilityService {
 	async getAvailableSlots(input: AvailabilityInput): Promise<TimeSlot[]> {

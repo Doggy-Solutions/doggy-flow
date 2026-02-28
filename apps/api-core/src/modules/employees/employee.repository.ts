@@ -1,5 +1,4 @@
-import { pg } from "../db/postgress.js";
-
+import {db } from "../../database/postgress.js";
 export const EmployeeRepository = {
 	async getWorkingHoursForDate(
 		employeeId: string,
@@ -8,7 +7,7 @@ export const EmployeeRepository = {
 	) {
 		const dayOfWeek = new Date(date).getDay();
 
-		const result = await pg.query(
+		const result = await db.query(
 			`
       SELECT start_time, end_time
       FROM employee_working_hours
@@ -23,7 +22,7 @@ export const EmployeeRepository = {
 	},
 
 	async getTimeOffForDate(employeeId: string, tenantId: string, date: string) {
-		const result = await pg.query(
+		const result = await db.query(
 			`
       SELECT start_datetime, end_datetime
       FROM employee_time_off

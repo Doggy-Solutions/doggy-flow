@@ -1,4 +1,4 @@
-import { pool } from "../../config/db.js";
+import { db } from "../../database/postgress.js";
 import { AvailabilityService } from "../availability/availability.service.js";
 import { addMinutes } from "date-fns";
 
@@ -9,7 +9,7 @@ export const createAppointment = async (
 	clientPhone: string,
 	startTimeISO: string,
 ) => {
-	const client = await pool.connect();
+	const client = await db.connect();
 
 	try {
 		await client.query("BEGIN");

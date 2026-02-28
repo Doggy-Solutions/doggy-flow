@@ -1,8 +1,8 @@
-import { pg } from "../db/postgress.js";
+import { db } from "../../database/postgress.js";
 
 export class AppointmentRepository {
 	static async create(data: any) {
-		const { rows } = await pg.query(
+		const { rows } = await db.query(
 			`
       INSERT INTO appointments
       (tenant_id, service_id, client_phone, start_time)
@@ -20,7 +20,7 @@ export class AppointmentRepository {
 		tenantId: string,
 		date: string,
 	) {
-		const result = await pg.query(
+		const result = await db.query(
 			`
     SELECT start_time, end_time
     FROM appointments
