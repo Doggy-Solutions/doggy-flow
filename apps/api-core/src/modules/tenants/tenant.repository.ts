@@ -1,8 +1,8 @@
-import { pg } from "../db/postgress.js";
+import { db } from "../../database/postgress.js";
 
 export class TenantRepository {
 	static async findByPhoneNumberId(phoneNumberId: string) {
-		const { rows } = await pg.query(
+		const { rows } = await db.query(
 			`
       SELECT t.*
       FROM tenants t

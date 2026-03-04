@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { internalAuth } from "../middleware/internalAuth.middleware.js";
-import { resolveTenantFromWa } from "../middleware/resolveTenant.middleware.js";
+import { internalAuth } from "../../middleware/internalAuth.middleware.js";
+import { resolveTenantFromWa } from "../../middleware/resolveTenant.middleware.js";
 
 const router = Router();
 

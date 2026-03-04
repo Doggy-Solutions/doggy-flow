@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { TenantRepository } from "../infrastructure/repositories/tenant.repository.js";
+import { TenantRepository } from "../modules/tenants/tenant.repository.js";
 
 declare module "express-serve-static-core" {
 	interface Request {

@@ -1,8 +1,8 @@
-import { pg } from "../db/postgress.js";
+import { db } from "../../database/postgress.js";
 
 export class ServiceRepository {
 	static async findByTenant(tenantId: string) {
-		const { rows } = await pg.query(
+		const { rows } = await db.query(
 			`SELECT * FROM services WHERE tenant_id = $1`,
 			[tenantId],
 		);
@@ -11,7 +11,7 @@ export class ServiceRepository {
 	}
 
 	static async findById(serviceId: string, tenantId: string) {
-		const { rows } = await pg.query(
+		const { rows } = await db.query(
 			`SELECT * FROM services WHERE id = $1 AND tenant_id = $2`,
 			[serviceId, tenantId],
 		);
